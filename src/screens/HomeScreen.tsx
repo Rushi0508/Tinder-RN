@@ -24,7 +24,7 @@ const HomeScreen = ({navigation}: HomeProps) => {
         <TouchableOpacity onPress={logOut}>
           <Image
             style={tw`h-10 w-10 rounded-full`}
-            source={{uri: user.photoURL || user.user.photo}}
+            source={{uri: user.photoURL}}
           />
         </TouchableOpacity>
 

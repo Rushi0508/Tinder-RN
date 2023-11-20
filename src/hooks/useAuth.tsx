@@ -1,4 +1,4 @@
-import auth from '@react-native-firebase/auth';
+// import auth from '@react-native-firebase/auth';
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import type {PropsWithChildren} from 'react'
 import {
@@ -6,7 +6,13 @@ import {
     GoogleSigninButton,
     statusCodes,
 } from '@react-native-google-signin/google-signin';
-
+import {
+    GoogleAuthProvider,
+    onAuthStateChanged,
+    signInWithCredential,
+    signOut 
+} from '@firebase/auth'
+import { auth } from '../firebase';
 const AuthContext = createContext({})
 
 
@@ -21,27 +27,28 @@ export const AuthProvider = ({children}: PropsWithChildren)=>{
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState(null)
 
-    function onAuthStateChanged(user:any){
-        if(user){
-            setUser(user)
-        }else{
-            setUser(null)
-        }
-        setLoadingInitial(false)
-    }
-
-    useEffect(()=> auth().onAuthStateChanged(onAuthStateChanged), [])
+    useEffect(
+        ()=>
+        onAuthStateChanged(auth, (user)=>{
+            console.log(user);
+            if(user){
+                setUser(user)
+            }else{
+                setUser(null)
+            }
+            setLoadingInitial(false)
+        }), 
+        []
+    );
 
     const signInWithGoogle = async ()=>{
         setIsLoading(true)
         try {
           await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-          const userInfo: null | any = await GoogleSignin.signIn();
-          setUser(userInfo)
-          console.log(userInfo);
-          
-          const googleCredential = auth.GoogleAuthProvider.credential(userInfo.idToken);
-          return auth().signInWithCredential(googleCredential);
+          const {idToken, accessToken}: null | any = await GoogleSignin.signIn();
+
+          const googleCredential = GoogleAuthProvider.credential(idToken, accessToken);
+          await signInWithCredential(auth, googleCredential);
         } catch (error: any) {
           setError(error)
         }finally{
@@ -52,8 +59,7 @@ export const AuthProvider = ({children}: PropsWithChildren)=>{
       const logOut = async()=>{
         setIsLoading(true);
         try{
-            await GoogleSignin.signOut();
-            setUser(null)
+            signOut(auth)
         }catch(error:any){
             setError(error)
         }finally{
