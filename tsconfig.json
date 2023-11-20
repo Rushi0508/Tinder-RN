@@ -2,6 +2,9 @@
   "extends": "@tsconfig/react-native/tsconfig.json",
   "compilerOptions": {
     "noImplicitAny": false,
-    "strictNullChecks": false
+    "strictNullChecks": false,
+    "paths": {
+      "@firebase/auth": ["./node_modules/@firebase/auth/dist/index.rn.d.ts"]
+    }
   }
 }

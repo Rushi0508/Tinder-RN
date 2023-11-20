@@ -59,6 +59,7 @@ export const AuthProvider = ({children}: PropsWithChildren)=>{
       const logOut = async()=>{
         setIsLoading(true);
         try{
+            await GoogleSignin.signOut();
             signOut(auth)
         }catch(error:any){
             setError(error)
