@@ -9,7 +9,7 @@ type LoginProps = NativeStackScreenProps<RootStackParamList, 'Login'>
 
 const LoginScreen = ({navigation}: LoginProps) => {
 
-  const {signInWithGoogle, GoogleSigninButton, isLoading}:any = useAuth();
+  const {signInWithGoogle}:any = useAuth();
 
   return (
     <SafeAreaView style={tw`flex-1`}>
