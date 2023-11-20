@@ -2,8 +2,10 @@ import { View, Text, Image, TextInput, TouchableOpacity } from 'react-native'
 import React, { useState } from 'react'
 import tw from 'twrnc'
 import useAuth from '../hooks/useAuth'
+import { doc, serverTimestamp, setDoc } from 'firebase/firestore'
+import { db } from '../firebase'
 
-const ModalScreen = () => {
+const ModalScreen = ({navigation}) => {
     const {user} = useAuth()
     const [image, setImage] = useState(null);
     const [job, setJob] = useState(null);
@@ -12,7 +14,18 @@ const ModalScreen = () => {
     const incompleteForm = !image || !job || !age;
 
     const updateUserProfile = ()=>{
-        
+        setDoc(doc(db, "users", user.uid), {
+            id: user.uid,
+            displayName: user.displayName,
+            photoURL: image,
+            job: job,
+            age: age,
+            timestamp: serverTimestamp()
+        }).then(()=>[
+            navigation.navigate("Home")
+        ]).catch((error)=>{
+            console.log(error)
+        })
     }
   return (
     <View style={tw`flex-1 items-center pt-1`}>
@@ -30,7 +43,7 @@ const ModalScreen = () => {
     </Text>
     <TextInput
     value={image}
-    onChangeText={(text)=>setImage(text)}
+    onChangeText={setImage}
         style={tw`text-center text-xl pb-2`}
         placeholder='Enter a profile pic URL'
     />
@@ -39,7 +52,7 @@ const ModalScreen = () => {
     </Text>
     <TextInput
      value={job}
-     onChangeText={(job)=>setJob(job)}
+     onChangeText={setJob}
         style={tw`text-center text-xl pb-2`}
         placeholder='Enter your occupation'
     />
@@ -49,7 +62,7 @@ const ModalScreen = () => {
     </Text>
     <TextInput
      value={age}
-     onChangeText={(age)=>setAge(age)}
+     onChangeText={setAge}
         style={tw`text-center text-xl pb-2`}
         placeholder='Enter your age'
         maxLength={2}
@@ -57,6 +70,7 @@ const ModalScreen = () => {
     />
 
     <TouchableOpacity 
+    onPress={updateUserProfile}
         style={tw`w-64 p-3 rounded-xl absolute bottom-10 bg-red-400 ${incompleteForm? 'bg-gray-400':'bg-red-400'}`}
         disabled={incompleteForm}
     >
