@@ -19,7 +19,7 @@ function StackNavigator() {
   const {user}:any= useAuth();
 
   return (
-    <Stack.Navigator>
+    <Stack.Navigator screenOptions={{headerShown:false}}>
       {
         user ? (
           <>
