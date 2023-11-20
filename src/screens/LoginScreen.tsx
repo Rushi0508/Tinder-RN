@@ -11,12 +11,6 @@ const LoginScreen = ({navigation}: LoginProps) => {
 
   const {signInWithGoogle, GoogleSigninButton, isLoading}:any = useAuth();
 
-  useLayoutEffect(()=>{
-    navigation.setOptions({
-      headerShown: false
-    })
-  }, [])
-
   return (
     <SafeAreaView style={tw`flex-1`}>
       <ImageBackground
