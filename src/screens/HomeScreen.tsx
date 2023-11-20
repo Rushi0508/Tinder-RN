@@ -1,5 +1,5 @@
 import { View, Text, Button, SafeAreaView, Image, TouchableOpacity, StyleSheet } from 'react-native'
-import React, { useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { RootStackParamList } from '../StackNavigator'
 import useAuth from '../hooks/useAuth'
@@ -8,6 +8,7 @@ import Icon from 'react-native-vector-icons/Ionicons'
 import Icon1 from 'react-native-vector-icons/Entypo'
 import Icon2 from 'react-native-vector-icons/AntDesign'
 import Swiper from 'react-native-deck-swiper'
+import auth from '@react-native-firebase/auth'
 
 type HomeProps = NativeStackScreenProps<RootStackParamList, 'Home'>
 
@@ -27,7 +28,7 @@ const HomeScreen = ({navigation}: HomeProps) => {
           />
         </TouchableOpacity>
 
-        <TouchableOpacity>
+        <TouchableOpacity onPress={()=>navigation.navigate("Modal")}>
           <Image
             style={tw`h-15 w-15`}
             source={{uri: "https://static.vecteezy.com/system/resources/previews/023/986/928/original/tinder-app-logo-tinder-app-logo-transparent-tinder-app-icon-transparent-free-free-png.png"}}
@@ -39,6 +40,7 @@ const HomeScreen = ({navigation}: HomeProps) => {
         </TouchableOpacity>
       </View>
       {/* End of Header  */}
+      
       {/* Cards  */}
       <View style={tw`flex-1 -mt-6`}>
         <Swiper cards={['DO', 'MORE', 'OF', 'WHAT', 'MAKES', 'YOU', 'HAPPY']}
