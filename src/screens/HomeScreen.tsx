@@ -1,5 +1,5 @@
 import { View, Text, Button, SafeAreaView, Image, TouchableOpacity, StyleSheet } from 'react-native'
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { RootStackParamList } from '../StackNavigator'
 import useAuth from '../hooks/useAuth'
@@ -9,6 +9,8 @@ import Icon1 from 'react-native-vector-icons/Entypo'
 import Icon2 from 'react-native-vector-icons/AntDesign'
 import Swiper from 'react-native-deck-swiper'
 import auth from '@react-native-firebase/auth'
+import { collection, doc, onSnapshot } from 'firebase/firestore'
+import { db } from '../firebase'
 
 type HomeProps = NativeStackScreenProps<RootStackParamList, 'Home'>
 
@@ -16,6 +18,35 @@ const HomeScreen = ({navigation}: HomeProps) => {
 
   const {logOut, user}:any = useAuth()
   const swipeRef = useRef(null)
+  const [profiles, setProfiles] = useState([]);
+
+  useLayoutEffect(()=>{
+    const unsub = onSnapshot(doc( db, "users", user.uid), (snapshot)=>{
+      if(!snapshot.exists()){
+        navigation.navigate("Modal");
+      }
+    })
+    return unsub;
+  }, [])
+
+  useEffect(()=>{
+    let unsub;
+
+    const fetchCards = async()=>{
+      unsub = onSnapshot(collection(db, "users"), snapshot=>{
+        setProfiles(
+          snapshot.docs.filter(doc=>doc.id!==user.uid).map((doc)=>({
+            id: doc.id,
+            ...doc.data()
+          }))
+        )
+      })
+    }
+    fetchCards();
+    return unsub;
+  }, [])
+  console.log(profiles);
+  
   
   return (
     <SafeAreaView style={tw`flex-1`}>
@@ -43,7 +74,7 @@ const HomeScreen = ({navigation}: HomeProps) => {
       
       {/* Cards  */}
       <View style={tw`flex-1 -mt-6`}>
-        <Swiper cards={['DO', 'MORE', 'OF', 'WHAT', 'MAKES', 'YOU', 'HAPPY']}
+        <Swiper cards={profiles}
           ref={swipeRef}
           containerStyle={{backgroundColor: "transparent"}}
           stackSize={5}
@@ -77,19 +108,33 @@ const HomeScreen = ({navigation}: HomeProps) => {
               }
             }
           }}
-          renderCard={(card)=>(
-            <View style={tw`relative bg-white h-3/4 rounded-xl`}>
+          renderCard={(card)=> card? (
+            <View key={card.id} style={tw`relative bg-white h-3/4 rounded-xl`}>
               <Image 
                 style={tw`h-full w-full rounded-xl absolute top-0`}
-                source={{uri: 'https://images.unsplash.com/photo-1548966239-c7dd5b975150?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDE4fHx8ZW58MHx8fHx8&w=1000&q=80'}}
+                source={{uri: card.photoURL}}
               />
               <View style={tw`absolute bottom-0 items-center justify-between px-6 py-2 rounded-b-xl flex-row bg-white w-full h-20 shadow-[#000] shadow-offset-0/1 shadow-radius-1.41 elevation-2 shadow-opacity-0.2`}>
                 <View>
-                  <Text style={tw`text-xl font-bold`}>{card}</Text>
-                  <Text>{card}</Text>
+                  <Text style={tw`text-xl font-bold`}>{card.displayName}</Text>
+                  <Text>{card.job}</Text>
                 </View>
-                <Text style={tw`text-2xl font-bold`}>card</Text>
+                <Text style={tw`text-2xl font-bold`}>{card.age}</Text>
               </View>
+            </View>
+          ):(
+            <View
+              style={
+                tw`relative bg-white h-3/4 rounded-xl items-center justify-center shadow-[#000] shadow-offset-0/1 shadow-radius-1.41 elevation-2 shadow-opacity-0.2`
+              }
+            >
+              <Text style={tw`font-bold text-lg pb-5`}>No more profiles</Text>
+              <Image 
+                style={tw`h-25 w-25`}
+                // height={100}
+                // width={50}
+                source={{uri: "https://links.papareact.com/6gb"}}
+              />
             </View>
           )}
         />
