@@ -9,10 +9,10 @@ type HomeProps = NativeStackScreenProps<RootStackParamList, 'Home'>
 const HomeScreen = ({navigation}: HomeProps) => {
 
   const {logOut, user}:any = useAuth()
-
+  
   return (
     <View>
-      <Text>Welcome, {user.user.name}</Text>
+      <Text>Welcome, {user.displayName || user?.user.name}</Text>
       <Button title="Go to chat screen" onPress={()=>navigation.navigate("Chat")}/>
       <Button 
         title= "Logout" 
