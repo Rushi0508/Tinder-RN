@@ -139,7 +139,7 @@ const HomeScreen = ({navigation}: HomeProps) => {
         <Swiper cards={profiles}
           ref={swipeRef}
           containerStyle={{backgroundColor: "transparent"}}
-          stackSize={5}
+          stackSize={3}
           cardIndex={0}
           verticalSwipe={false}
           animateCardOpacity
@@ -189,7 +189,7 @@ const HomeScreen = ({navigation}: HomeProps) => {
           ):(
             <View
               style={
-                tw`relative bg-white h-3/4 rounded-xl items-center justify-center shadow-[#000] shadow-offset-0/1 shadow-radius-1.41 elevation-2 shadow-opacity-0.2`
+                tw`relative bg-white h-3/4 rounded-xl items-center justify-center shadow-[#000] shadow-offset-0/1 shadow-radius-1.41 elevation-2 shadow-opacity-20`
               }
             >
               <Text style={tw`font-bold text-lg pb-5`}>No more profiles</Text>
