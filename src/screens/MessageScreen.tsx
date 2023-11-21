@@ -71,9 +71,9 @@ const MessageScreen = ({route}: MessageProps) => {
                     }
                 />
             </TouchableWithoutFeedback>
-            <View style={tw`flex-row items-center justify-between border-t border-gray-200 px-5 py-2`}>
+            <View style={tw`flex-row items-center justify-between border-t border-gray-200 px-5`}>
                 <TextInput
-                    style={tw`h-10 text-lg`}
+                    style={tw`h-15 text-lg`}
                     placeholder='Send Message...'
                     onChangeText={setInput}
                     onSubmitEditing={sendMessage}
