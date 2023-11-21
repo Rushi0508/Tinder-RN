@@ -9,7 +9,7 @@ import Icon1 from 'react-native-vector-icons/Entypo'
 import Icon2 from 'react-native-vector-icons/AntDesign'
 import Swiper from 'react-native-deck-swiper'
 import auth from '@react-native-firebase/auth'
-import { collection, doc, onSnapshot } from 'firebase/firestore'
+import { collection, doc, getDocs, onSnapshot, query, setDoc, where } from 'firebase/firestore'
 import { db } from '../firebase'
 
 type HomeProps = NativeStackScreenProps<RootStackParamList, 'Home'>
@@ -33,7 +33,24 @@ const HomeScreen = ({navigation}: HomeProps) => {
     let unsub;
 
     const fetchCards = async()=>{
-      unsub = onSnapshot(collection(db, "users"), snapshot=>{
+
+      const passes = await getDocs(collection(db, "users", user.uid, "passes")).then((snapshot)=>
+        snapshot.docs.map((doc)=>doc.id)
+      );
+      const swipes = await getDocs(collection(db, "users", user.uid, "swipes")).then((snapshot)=>
+        snapshot.docs.map((doc)=>doc.id)
+      );
+      //@ts-ignore
+      const passedUserIds = passes.length > 0? passes : ["test"];
+      const swipedUserIds = swipes.length > 0? swipes : ["test"];
+
+      unsub = onSnapshot(
+        query(
+          collection(db, "users"),
+          // @ts-ignore
+          where("id", "not-in", [...passedUserIds, ...swipedUserIds])
+        ),  
+        (snapshot)=>{
         setProfiles(
           snapshot.docs.filter(doc=>doc.id!==user.uid).map((doc)=>({
             id: doc.id,
@@ -45,7 +62,20 @@ const HomeScreen = ({navigation}: HomeProps) => {
     fetchCards();
     return unsub;
   }, [])
-  console.log(profiles);
+  
+  const swipeLeft = async (cardIndex)=>{
+    if(!profiles[cardIndex]) return;
+
+    const userSwiped = profiles[cardIndex];
+    console.log("Passed " + userSwiped.displayName);
+    setDoc(doc(db, 'users', user.uid, "passes", userSwiped.id), userSwiped);
+  }
+  const swipeRight = async (cardIndex)=>{
+    if(!profiles[cardIndex]) return;
+
+    const userSwiped = profiles[cardIndex];
+    setDoc(doc(db, 'users', user.uid, "swipes", userSwiped.id), userSwiped);
+  }
   
   
   return (
@@ -81,11 +111,13 @@ const HomeScreen = ({navigation}: HomeProps) => {
           cardIndex={0}
           verticalSwipe={false}
           animateCardOpacity
-          onSwipedLeft={()=>{
+          onSwipedLeft={(cardIndex)=>{
             console.log("SWIPE PASS")
+            swipeLeft(cardIndex)
           }}
-          onSwipedRight={()=>{
+          onSwipedRight={(cardIndex)=>{
             console.log("SWIPE MATCH")
+            swipeRight(cardIndex)
           }}
           backgroundColor={"#4FD0E9"}
           overlayLabels={{
