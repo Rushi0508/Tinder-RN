@@ -5,12 +5,14 @@ import ChatScreen from './screens/ChatScreen';
 import LoginScreen from './screens/LoginScreen';
 import useAuth from './hooks/useAuth';
 import ModalScreen from './screens/ModalScreen';
+import MatchedScreen from './screens/MatchedScreen';
 
 export type RootStackParamList = {
   Home: undefined;
   Chat: undefined;
   Login: undefined;
-  Modal: undefined
+  Modal: undefined;
+  Match: {loggedInProfile: any, userSwiped: any}
 }
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -30,6 +32,9 @@ function StackNavigator() {
             </Stack.Group>
             <Stack.Group screenOptions={{presentation: "modal"}}>
               <Stack.Screen name="Modal" component={ModalScreen}/>
+            </Stack.Group>
+            <Stack.Group screenOptions={{presentation: "transparentModal"}}>
+              <Stack.Screen name="Match" component={MatchedScreen}/>
             </Stack.Group>
           </>
         ) : (
