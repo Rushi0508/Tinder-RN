@@ -38,12 +38,11 @@ const MessageScreen = ({route}: MessageProps) => {
             query(
                 collection(db, "matches", matchDetails.id, "messages"),
                 orderBy('timestamp', 'desc')
-            ), snapshot=>[
+            ), snapshot=>
                 setMessages(snapshot.docs.map(doc=>({
                     id: doc.id,
                     ...doc.data()
                 })))
-            ]
         ), 
         [matchDetails,db]
     )
