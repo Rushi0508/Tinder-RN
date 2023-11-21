@@ -1,5 +1,5 @@
 import { View, Text, TextInput, Button, Pressable, TouchableOpacity, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, FlatList } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { RootStackParamList } from '../StackNavigator'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -9,6 +9,8 @@ import { getMatchedUserInfo } from '../lib/getMatchedUserInfo'
 import tw from 'twrnc'
 import SenderMessage from '../components/SenderMessage'
 import ReceiverMessage from '../components/ReceiverMessage'
+import { addDoc, collection, onSnapshot, orderBy, query, serverTimestamp } from 'firebase/firestore'
+import { db } from '../firebase'
 
 type MessageProps = NativeStackScreenProps<RootStackParamList, "Message">
 
@@ -16,11 +18,35 @@ const MessageScreen = ({route}: MessageProps) => {
 
     const {user}:any = useAuth();
     const {matchDetails} = route.params
-    const [input, setInput] = useState("")
+    const [input, setInput] = useState(null)
+    const noInput = !input;
     const [messages, setMessages] = useState([])
     const sendMessage = ()=>{
-
+        if(!input) return;
+        addDoc(collection(db, "matches", matchDetails.id, "messages"), {
+            timestamp: serverTimestamp(),
+            userId: user.uid,
+            displayName: user.displayName,
+            photoURL: matchDetails.users[user.uid].photoURL,
+            message: input
+        })
+        setInput("")
     }
+
+    useEffect(()=>
+        onSnapshot(
+            query(
+                collection(db, "matches", matchDetails.id, "messages"),
+                orderBy('timestamp', 'desc')
+            ), snapshot=>[
+                setMessages(snapshot.docs.map(doc=>({
+                    id: doc.id,
+                    ...doc.data()
+                })))
+            ]
+        ), 
+        [matchDetails,db]
+    )
 
   return (
     <SafeAreaView style={tw`flex-1`}>
@@ -35,6 +61,7 @@ const MessageScreen = ({route}: MessageProps) => {
                 <FlatList
                     data={messages}
                     style={tw`pl-4`}
+                    inverted
                     keyExtractor={item=>item.id}
                     renderItem={({item:message})=>
                         message.userId === user.uid ? (
@@ -53,7 +80,7 @@ const MessageScreen = ({route}: MessageProps) => {
                     onSubmitEditing={sendMessage}
                     value={input}
                     />
-                <TouchableOpacity>
+                <TouchableOpacity disabled={noInput} onPress={sendMessage}>
                     <Text style={tw`text-lg text-red-500`}>Send</Text>
                 </TouchableOpacity>
             </View>
