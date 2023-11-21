@@ -9,8 +9,9 @@ import Icon1 from 'react-native-vector-icons/Entypo'
 import Icon2 from 'react-native-vector-icons/AntDesign'
 import Swiper from 'react-native-deck-swiper'
 import auth from '@react-native-firebase/auth'
-import { collection, doc, getDocs, onSnapshot, query, setDoc, where } from 'firebase/firestore'
+import { DocumentSnapshot, collection, doc, getDoc, getDocs, onSnapshot, query, serverTimestamp, setDoc, where } from 'firebase/firestore'
 import { db } from '../firebase'
+import { generateId } from '../lib/generateId'
 
 type HomeProps = NativeStackScreenProps<RootStackParamList, 'Home'>
 
@@ -74,7 +75,38 @@ const HomeScreen = ({navigation}: HomeProps) => {
     if(!profiles[cardIndex]) return;
 
     const userSwiped = profiles[cardIndex];
-    setDoc(doc(db, 'users', user.uid, "swipes", userSwiped.id), userSwiped);
+    const loggedInProfile = await(
+      await getDoc(doc(db, "users", user.uid))
+    ).data();
+    // Check if the user has also swiped on you
+    getDoc(doc(db, "users", userSwiped.id, "swipes", user.uid)).then(
+      (documentSnapshot)=>{
+        if(documentSnapshot.exists()){
+          // user has matched with you before you matched with them...
+
+          // Record swipe
+          setDoc(doc(db, 'users', user.uid, "swipes", userSwiped.id), userSwiped);
+
+          // create a match
+          setDoc(doc(db, "matches", generateId(user.uid, userSwiped.id)), {
+            users: {
+              [user.uid]: loggedInProfile,
+              [userSwiped.id]: userSwiped
+            },
+            usersMatched: [user.uid, userSwiped.id],
+            timestamp: serverTimestamp()
+          });
+          navigation.navigate('Match', {
+            loggedInProfile,userSwiped
+          });
+
+        }else{
+          // User has swiped as first interaction between two..
+          setDoc(doc(db, 'users', user.uid, "swipes", userSwiped.id), userSwiped);
+        }
+      }
+    )
+
   }
   
   
