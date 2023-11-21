@@ -20,7 +20,7 @@ const Header = ({title,callEnabled}) => {
         <Text style={tw`text-2xl font-bold pl-2`}>{title}</Text>
       </View>
       {callEnabled && (
-        <TouchableOpacity style={tw`rounded-full mr-4 p-3 bg-red-200`}>
+        <TouchableOpacity style={tw`rounded-full mr-4 px-3 py-2 bg-red-200`}>
             <Icon1 name="telephone" size={20} color="red"/>
         </TouchableOpacity>
       )}
